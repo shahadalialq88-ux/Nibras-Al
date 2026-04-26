@@ -2,5 +2,5 @@ streamlit
 pandas
 plotly
 python-pptx
-fpdf2
+fpdf
 openpyxl
