@@ -6,136 +6,135 @@ from io import BytesIO
 import datetime
 
 # ==========================================
-# 1. إعدادات المنصة والهوية البصرية
+# 1. UI & Branding (الطبقة البصرية)
 # ==========================================
 st.set_page_config(page_title="NIBRAS AI | نبراس", layout="wide")
 
-# تصميم واجهة مستخدم نظيفة وفخمة (Luxury Minimalist)
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
-    * { font-family: 'Cairo', sans-serif; }
-    .stApp { background-color: #fcfcfc; }
-    .main-header { 
-        color: #1a1a1a; 
-        text-align: right; 
-        border-right: 8px solid #D4AF37; 
-        padding-right: 20px; 
-        margin-bottom: 30px;
-    }
-    .metric-card { 
-        background: white; 
-        padding: 25px; 
-        border-radius: 15px; 
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
-        border-bottom: 4px solid #D4AF37;
-        text-align: center;
-    }
+    * { font-family: 'Cairo', sans-serif; text-align: right; }
+    .stApp { background-color: #f8faff; }
+    .main-card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-right: 10px solid #D4AF37; margin-bottom: 20px; }
+    .insight-card { background: #fff; border-right: 5px solid #2ecc71; padding: 15px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .recommendation-card { background: #fff; border-right: 5px solid #3498db; padding: 15px; margin: 10px 0; border-radius: 8px; }
     </style>
     """, unsafe_allow_html=True)
 
 # ==========================================
-# 2. وظائف معالجة المخرجات (PPTX Engine)
+# 2. Intelligence Engines (العقول المشغلة)
 # ==========================================
-def create_executive_ppt(target_name, growth_rate, average_val):
-    """توليد عرض بوربوينت احترافي يدعم العربية"""
+
+def insight_engine(df, target):
+    """محرك استخراج النتائج الذكي بناءً على القواعد"""
+    avg = df[target].mean()
+    current = df[target].iloc[-1]
+    growth = ((current - df[target].iloc[0]) / df[target].iloc[0]) * 100
+    peak = df[target].max()
+    
+    insights = []
+    # قاعدة النمو
+    if growth > 10:
+        insights.append(f"ارتفاع ملحوظ: حقق المؤشر نمواً قوياً بنسبة {growth:.1f}%، مما يتجاوز الأهداف الربعية.")
+    elif growth < -10:
+        insights.append(f"تنبيه فجوة: انخفض الأداء بنسبة {abs(growth):.1f}%، يتطلب الأمر مراجعة فورية للمسببات.")
+    else:
+        insights.append(f"استقرار نسبي: الأداء ضمن النطاق الطبيعي بنسبة تغير {growth:.1f}%.")
+    
+    # قاعدة الكفاءة
+    if current > avg:
+        insights.append(f"كفاءة تشغيلية: القيمة الحالية ({current:,.0f}) أعلى من المتوسط العام، مما يشير لزخم إيجابي.")
+        
+    return insights, growth, avg, peak
+
+def recommendation_engine(growth):
+    """محرك اقتراح القرارات"""
+    if growth > 10:
+        return ["توسيع الاستثمار في القنوات الحالية", "نقل التجربة الناجحة للأقسام الأخرى", "رفع سقف الأهداف السنوية"]
+    elif growth < -10:
+        return ["إيقاف مؤقت للإنفاق غير الضروري", "إجراء فحص تدقيق (Deep Dive) للعمليات", "تعديل الاستراتيجية التشغيلية فوراً"]
+    return ["الحفاظ على الوتيرة الحالية", "تحسين كفاءة الموارد المتاحة", "مراقبة الأداء بشكل أسبوعي"]
+
+# ==========================================
+# 3. Output Engine (نظام الإخراج)
+# ==========================================
+
+def create_pro_presentation(target, insights, recs):
     prs = Presentation()
-    
     # شريحة الغلاف
-    slide_layout = prs.slide_layouts[0]
-    slide = prs.slides.add_slide(slide_layout)
-    title = slide.shapes.title
-    title.text = "نبراس AI - تقرير الأداء الاستراتيجي"
+    slide = prs.slides.add_slide(prs.slide_layouts[0])
+    slide.shapes.title.text = "NIBRAS AI | تقرير ذكاء القرار"
+    slide.placeholders[1].text = f"إعداد المتخصصة: شهد آل مستور\nتاريخ التحليل: {datetime.date.today()}"
     
-    subtitle = slide.placeholders[1]
-    subtitle.text = f"إعداد: شهد آل مستور\nتاريخ التحليل: {datetime.date.today()}\nنظام ذكاء القرار المعتمد"
-
-    # شريحة البيانات الأساسية
-    slide_layout_2 = prs.slides.add_slide(prs.slide_layouts[1])
-    slide_layout_2.shapes.title.text = "النتائج التحليلية الرئيسية"
-    body_shape = slide_layout_2.shapes.placeholders[1]
-    tf = body_shape.text_frame
-    tf.text = f"• المؤشر المحلل: {target_name}"
-    p = tf.add_paragraph()
-    p.text = f"• معدل النمو المحقق: {growth_rate:.2f}%"
-    p2 = tf.add_paragraph()
-    p2.text = f"• متوسط كفاءة الأداء: {average_val:,.0f}"
-
+    # شريحة النتائج
+    slide2 = prs.slides.add_slide(prs.slide_layouts[1])
+    slide2.shapes.title.text = "أهم النتائج (Key Insights)"
+    tf = slide2.shapes.placeholders[1].text_frame
+    for ins in insights:
+        p = tf.add_paragraph()
+        p.text = f"• {ins}"
+        
     ppt_io = BytesIO()
     prs.save(ppt_io)
     ppt_io.seek(0)
     return ppt_io
 
 # ==========================================
-# 3. الهيكل التشغيلي للمنصة
+# 4. User Experience (رحلة المستخدم)
 # ==========================================
-st.markdown("<h1 class='main-header'>💎 نـبـراس | NIBRAS AI<br><small style='font-size:0.5em; color:#666;'>منصة ذكاء القرار الاستراتيجي</small></h1>", unsafe_allow_html=True)
 
-uploaded_file = st.file_uploader("📂 ارفعي ملف البيانات للبدء (Excel / CSV)", type=['xlsx', 'csv'])
+st.markdown("<div class='main-card'><h1>💎 نبراس AI | Nebras AI</h1><p>نظام تحليل البيانات وصناعة التقارير التنفيذية</p></div>", unsafe_allow_html=True)
+
+# خطوة الإدخال (Input Layer)
+with st.sidebar:
+    st.header("⚙️ إعدادات التحليل")
+    uploaded_file = st.file_uploader("ارفع ملف Excel/CSV", type=['xlsx', 'csv'])
+    audience = st.selectbox("الجمهور المستهدف", ["مجلس الإدارة (CEO)", "مدراء الأقسام", "الفريق التقني"])
+    report_type = st.radio("نوع التقرير", ["تنفيذي (Executive)", "تفصيلي (Detailed)"])
 
 if uploaded_file:
-    try:
-        # معالجة الملف
-        if uploaded_file.name.endswith('.xlsx'):
-            df = pd.read_excel(uploaded_file)
-        else:
-            df = pd.read_csv(uploaded_file)
-        
-        target_column = df.columns[1] # افترضنا العمود الثاني هو الهدف
-        
-        # محرك الحسابات الذكي
-        avg_performance = df[target_column].mean()
-        latest_value = df[target_column].iloc[-1]
-        initial_value = df[target_column].iloc[0]
-        growth_percentage = ((latest_value - initial_value) / initial_value) * 100
-        
-        # عرض بطاقات الأداء (Metrics Cards)
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.markdown(f"<div class='metric-card'><h6>متوسط الأداء</h6><h2 style='color:#D4AF37;'>{avg_performance:,.0f}</h2></div>", unsafe_allow_html=True)
-        with col2:
-            st.markdown(f"<div class='metric-card'><h6>صافي النمو</h6><h2 style='color:#D4AF37;'>{growth_percentage:.1f}%</h2></div>", unsafe_allow_html=True)
-        with col3:
-            status = "إيجابي" if growth_percentage > 0 else "تراجع"
-            color = "#2ecc71" if growth_percentage > 0 else "#e74c3c"
-            st.markdown(f"<div class='metric-card'><h6>حالة المؤشر</h6><h2 style='color:{color};'>{status}</h2></div>", unsafe_allow_html=True)
+    df = pd.read_excel(uploaded_file) if uploaded_file.name.endswith('.xlsx') else pd.read_csv(uploaded_file)
+    target_col = df.columns[1]
+    
+    # مرحلة المعالجة (Processing Logic)
+    insights, growth, avg, peak = insight_engine(df, target_col)
+    recommendations = recommendation_engine(growth)
+    
+    # عرض النتائج (Results View)
+    tab1, tab2, tab3 = st.tabs(["💡 الاستنتاجات", "📊 التحليل البصري", "📦 التصدير"])
+    
+    with tab1:
+        st.subheader("💡 النتائج المستخلصة (Insights)")
+        for ins in insights:
+            st.markdown(f"<div class='insight-card'>{ins}</div>", unsafe_allow_html=True)
+            
+        st.subheader("🚀 توصيات القرار (Recommendations)")
+        for rec in recommendations:
+            st.markdown(f"<div class='recommendation-card'>• {rec}</div>", unsafe_allow_html=True)
 
-        st.markdown("<br>", unsafe_allow_html=True)
-
-        # الرسم البياني التفاعلي
-        st.subheader(f"📈 تحليل المسار الزمني لـ {target_column}")
-        fig = px.area(df, x=df.columns[0], y=target_column, line_shape="spline", color_discrete_sequence=['#D4AF37'])
+    with tab2:
+        fig = px.area(df, x=df.columns[0], y=target_col, title=f"تحليل الاتجاه لـ {target_col}", color_discrete_sequence=['#D4AF37'])
         fig.update_layout(font_family="Cairo", paper_bgcolor='white', plot_bgcolor='white')
         st.plotly_chart(fig, use_container_width=True)
 
-        # مخرجات الاعتماد
-        st.divider()
-        st.subheader("📦 مخرجات لجنة الاعتماد")
-        col_btn, col_info = st.columns([1, 2])
-        
-        with col_btn:
-            ppt_output = create_executive_ppt(target_column, growth_percentage, avg_performance)
-            st.download_button(
-                label="📥 تحميل عرض البوربوينت الرسمي",
-                data=ppt_output,
-                file_name="Nibras_Executive_Report.pptx",
-                mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
-            )
-        
-        with col_info:
-            st.info("تم تجهيز العرض التقديمي ليحتوي على كافة الإحصائيات مع ضمان ظهور حقوق الملكية (شهد آل مستور).")
-
-    except Exception as e:
-        st.error(f"حدث خطأ أثناء معالجة الملف. يرجى التأكد من تنسيق البيانات. الرمز: {e}")
+    with tab3:
+        st.subheader("توليد الوثائق النهائية")
+        ppt_data = create_pro_presentation(target_col, insights, recommendations)
+        st.download_button(
+            label="📥 تحميل عرض البوربوينت التنفيذي",
+            data=ppt_data,
+            file_name=f"Nibras_Report_{datetime.date.today()}.pptx",
+            mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
+        )
+        st.success(f"تم تخصيص التقرير لجمهور: {audience}")
 
 else:
-    st.info("نبراس AI بانتظار البيانات لتحويلها إلى رؤى استراتيجية.")
-    st.image("https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2426&auto=format&fit=crop", use_column_width=True)
+    st.info("نظام نبراس بانتظار رفع البيانات للبدء في 'فهمها وتفسيرها'.")
 
-# الحاشية السيادية
+# التوقيع
 st.markdown(f"""
-    <div style="text-align: center; margin-top: 80px; padding: 20px; border-top: 1px solid #eee; color: #888;">
-        <p><b>Developed by: Shahad Ali Al-Mastour</b> | CS Specialist</p>
-        <p>© 2026 NIBRAS AI | الإصدار المعتمد 1.0</p>
+    <div style="text-align: center; margin-top: 50px; color: #888; border-top: 1px solid #eee; padding-top: 20px;">
+        Developed by: <b>Shahad Ali Al-Mastour</b> | CS Specialist <br>
+        <b>Nebras AI v1.0</b>
     </div>
     """, unsafe_allow_html=True)
